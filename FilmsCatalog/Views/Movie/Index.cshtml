@@ -1,0 +1,76 @@
+﻿@using FilmsCatalog.ViewModels
+@using System.Security.Claims;
+@model FilmsCatalog.ViewModels.Movie.MovieViewModel
+@{
+
+    ViewData["title"] = "Все фильмы";
+    IEnumerable<Movie> movies = Model.Movies;
+    PagingViewModel paging = Model.PagingViewModel;
+    string currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+}
+
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <button type="button" class="btn btn-success add-btn" onclick="location.href='@Url.Action("Add")'">Добавить</button>
+        </div>
+        <div class="col-12">
+            @if (movies != null && movies.Any())
+            {
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Название</th>
+                            <th scope="col">Описание</th>
+                            <th scope="col">Год выпуска</th>
+                            <th scope="col">Режисёр</th>
+                            <th scope="col">Автор</th>
+                            <th scope="col">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Movie movie in movies)
+                        {
+                            <tr>
+                                <th scope="row">@movie.Id</th>
+                                <td>@movie.Name</td>
+                                <td>@movie.Description</td>
+                                <td>@movie.ReleaseDate.ToString("MM/dd/yyyy")</td>
+                                <td>@movie.Director</td>
+                                <td>@movie.Author?.FirstName</td>
+                                <td>
+                                    @if (currentUserId.Equals(movie.AuthorId))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@movie.Id"><i class="fa fa-pencil"></i></a>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa fa-pencil disabled-icon"></i>
+                                    }
+                                    <a asp-action="View" asp-route-id="@movie.Id"><i class="fa fa-eye"></i></a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <!-- START PAGINATION -->
+                <div class="row">
+                    <div class="col-12">
+                        <hr>
+                        @if (paging != null && !(paging.TotalPages <= 1) && movies.Any())
+                        {
+                            <partial model="@Model" name="PartialViews/Pagination" />
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger" role="alert">
+                    Список фильмов пуст!
+                </div>
+            }
+        </div>
+    </div>
+</div>

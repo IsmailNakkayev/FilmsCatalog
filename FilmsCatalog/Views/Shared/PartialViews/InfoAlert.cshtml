@@ -1,0 +1,26 @@
+﻿@{
+    bool? success = ViewData["success"] as bool?;
+}
+@if (success != null)
+{
+    if (success.Value)
+    {
+        <script>
+            swal({
+                title: "Успех!",
+                text: "Изменения успешно сохранены",
+                icon: "success",
+            });
+        </script>
+    }
+    else
+    {
+        <script>
+            swal({
+                title: "Ошибка!",
+                text: "Ошибка при сохранении изменении!",
+                icon: "error",
+            });
+        </script>
+    }
+}

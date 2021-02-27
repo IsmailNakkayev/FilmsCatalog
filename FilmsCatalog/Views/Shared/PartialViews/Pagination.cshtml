@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Http.Extensions
+@using Microsoft.AspNetCore.WebUtilities
+@using FilmsCatalog.ViewModels
+@{
+    var paging = Model?.PagingViewModel as PagingViewModel;
+
+    // Parse Url and remove page param //
+    var queryString = Context.Request.QueryString.ToString();
+    var query = QueryHelpers.ParseQuery(queryString);
+    var items = query.SelectMany(x => x.Value,
+        (col, value) => new KeyValuePair<string, string>(col.Key, value)).ToList();
+    items.RemoveAll(x => x.Key == "page");
+    var qb = new QueryBuilder(items);
+    qb.Add("page", "");
+    queryString = qb.ToQueryString().ToString();
+}
+@if (paging != null)
+{
+    <nav style="display: flex;" aria-label="Page navigation example">
+        <ul class="pagination" style="margin:0;">
+            @{
+                var prevDisabled = !paging.HasPreviousPage ? "disabled" : "";
+                var nextDisabled = !paging.HasNextPage ? "disabled" : "";
+                var leftOffset = paging.CurrentPage > 5 ? 5 : (paging.CurrentPage - 1);
+                var rightOffset = (paging.CurrentPage + 5) > paging.TotalPages ? paging.TotalPages : paging.CurrentPage + 5;
+            }
+            <li class="page-item @prevDisabled">
+                <a href="@queryString@(paging.CurrentPage - 1)" class="page-link pagination-arrows">
+                    <span aria-hidden="true">
+                        <i class="fa fa-arrow-left"></i>
+                    </span>
+                </a>
+            </li>
+            @for (var i = paging.CurrentPage - leftOffset; i <= rightOffset; i++)
+            {
+                if (paging.CurrentPage == 0) { paging.CurrentPage = 1; }
+                var active = i == paging.CurrentPage ? "active" : "";
+                <li class="page-item @active">
+                    <a href="@queryString@i" class="page-link pagination-item">
+                        <span>@i</span>
+                    </a>
+                </li>
+            }
+            <li class="page-item @nextDisabled">
+                <a href="@queryString@(paging.CurrentPage + 1)" class="page-link pagination-arrows">
+                    <span aria-hidden="true">
+                        <i class="fa fa-arrow-right"></i>
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+}
